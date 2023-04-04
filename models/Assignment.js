@@ -1,13 +1,16 @@
 import mongoose from "mongoose";
+
+const filesSchema = {
+  files:{type:String,require:true},
+  name:{type:String,require:true},
+  type:{type:String,require:true},
+}
+
 const submission = {
   userId: 
     { type: mongoose.Schema.Types.ObjectId },
   
-  material: [
-    {
-      type: String,
-    },
-  ],
+  material: [filesSchema],
   dateTime: {
     type: Date,
   },
@@ -34,6 +37,10 @@ const assignmentScchema = new mongoose.Schema({
     type:  mongoose.Schema.Types.ObjectId ,
     require:true
   },
+  createdBy: {
+    type:  mongoose.Schema.Types.ObjectId ,
+    require:true
+  },
   instructions: {
     type: String,
     default: "",
@@ -41,16 +48,10 @@ const assignmentScchema = new mongoose.Schema({
   points: {
     type: Number,
   },
-  files: {
-    type: String,
-  },
+  files: [filesSchema],
   turnedInBy: [{
      type: mongoose.Schema.Types.ObjectId, default: [] }],
   dueDateTime: {
-    type: Date,
-    required: true,
-  },
-  closedDateTime: {
     type: Date,
     required: true,
   },

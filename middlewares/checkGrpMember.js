@@ -6,7 +6,7 @@ import { User } from "../models/User.js";
 const checkGrpMember = async(req,res,next)=>{
     try{
         const loggeduser = req.user;
-        const user = await User.findOne({email:loggeduser.email});
+        const user = await User.findOne({email:loggeduser.email}).select("-password -creationDateAndTime, -loginDates -checkReset -lastotp");
         if(!user){
             throw new Error("User Not Found");
         }

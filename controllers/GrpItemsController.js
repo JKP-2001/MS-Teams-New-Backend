@@ -5,6 +5,7 @@ import { groupModel } from "../Models/Group.js";
 import { groupAssignmentModel, groupPostModel, replyModel, scheduleMeetModel } from "../Models/GrpItems.js";
 
 import mongoose from "mongoose";
+import fs from "fs";
 
 
 const postNewItem = async (req, res) => {
@@ -17,7 +18,6 @@ const postNewItem = async (req, res) => {
         console.log(req.files)
         for (let i = 0; i < req.files.length; i++) {
             const newPath = req.files[i].path.replace(/\\/g, '/');
-            console.log(req.files[i])
             const entry = {
                 files:newPath,
                 name:req.files[i].originalname,
@@ -103,6 +103,11 @@ const deleteAItem = async (req, res) => {
             }
             itemsPosted.splice(itemsPosted.indexOf(item._id),1);
             const updatedGrp = await groupModel.findByIdAndUpdate(groupDetails._id,{itemsPosted});
+            if(item.files.length>0){
+                item.files.map((item_obj)=>{
+                    fs.unlinkSync(item_obj.files);
+                })
+            }
             const updatePost = await groupPostModel.findByIdAndDelete(item._id);
             res.status(200).json({ success:true, details:"Item deleted." });
             return;
@@ -183,6 +188,8 @@ const editPost = async(req,res)=>{
         const userDetails = req.body.userDetails;
         const type = req.body.type;
         const postId = req.body.postId;
+        const deletedItem = req.body.deletedItems;
+        // console.log({type: typeof(deletedItem)})
         
 
         if (type === "post") {
@@ -198,8 +205,32 @@ const editPost = async(req,res)=>{
             if(String(item.details.postedBy)!==String(userDetails._id)){
                 throw new Error("Not authorized to edit this item.");
             }
+
+            let files = item.files;
+
+            if(req.files && req.files.length>0){
+                for (let i = 0; i < req.files.length; i++) {
+                    const newPath = req.files[i].path.replace(/\\/g, '/');
+                    const entry = {
+                        files:newPath,
+                        name:req.files[i].originalname,
+                        type:req.files[i].mimetype
+                    }
+                    files.push(entry);
+                }   
+            }
+
+            if(deletedItem && deletedItem.map((item_obj)=>{
+                fs.unlinkSync(item_obj);
+            }))
+
+            files.map((item_obj,i)=>{
+                if(deletedItem.includes(item_obj.files)){
+                    files.splice(i,1);
+                }
+            })
             
-            const updatePost = await groupPostModel.findByIdAndUpdate(item._id,{content:req.body.content});
+            const updatePost = await groupPostModel.findByIdAndUpdate(item._id,{content:req.body.content,files:files});
             res.status(200).json({ success:true, details:"Item updated." });
             return;
         }

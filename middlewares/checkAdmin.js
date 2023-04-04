@@ -6,12 +6,13 @@ import { User } from "../models/User.js";
 const checkAdmin = async(req,res,next)=>{
     try{
         const loggeduser = req.user;
-        const user = await User.findOne({email:loggeduser.email});
+        const user = await User.findOne({email:loggeduser.email}).select("-password -creationDateAndTime, -loginDates -checkReset -lastotp");
         if(!user){
             throw new Error("User Not Found");
         }
         
         const grpId = req.body.grp_id;
+        // console.log({grpId})
         console.log({grpId});
         const grp = await groupModel.findById(grpId);
         if(!grp){

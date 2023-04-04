@@ -11,7 +11,7 @@ import morgan from "morgan";
 import { grpRouter } from "./Routes/GrpRoutes.js";
 import path from "path";
 import { grpItemRoutes } from "./Routes/GrpItemRoutes.js";
-import { assRouter } from "./routes/AssignmentRoutes.js";
+import { grpAssignmentRoutes } from "./routes/AssignmentRoutes.js";
 
 
 const BASE_URL = process.env.BASE_URL;
@@ -49,7 +49,7 @@ app.use((req, res, next) => {
 app.use(BASE_URL, authRouter);
 app.use(BASE_URL, grpRouter);
 app.use(BASE_URL,grpItemRoutes)
-app.use(BASE_URL,assRouter)
+app.use(BASE_URL,grpAssignmentRoutes)
 
 
 const swaggerDefinition = {
@@ -89,6 +89,7 @@ const runApp = () => {
         }
         console.log("connected to mongodb");
     });
+    
     const PORT = process.env.PORT || 5000;
 
     app.listen(PORT, () => {

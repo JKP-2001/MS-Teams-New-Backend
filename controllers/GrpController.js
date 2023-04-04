@@ -5,6 +5,7 @@ import { generateGrpCode, ReadAppend } from "../functions.js";
 import { groupModel } from "../Models/Group.js"
 import { User } from "../models/User.js";
 import { groupPostModel, scheduleMeetModel } from "../Models/GrpItems.js";
+import { Assignment } from "../models/Assignment.js";
 
 const file = 'APILogs.txt'
 const BASE_URL = process.env.BASE_URL
@@ -26,6 +27,18 @@ async function getAllMembersFromArray(memberArray) {
     let array = [];
     for (let i = 0; i < memberArray.length; i++) {
         const grp = await User.findById(memberArray[i]).select("firstName lastName email");
+        if (grp) {
+            array.push(grp);
+        }
+    }
+    return array;
+}
+
+
+async function getAssignmentArray(assignmentsPosted) {
+    let array = [];
+    for (let i = 0; i < assignmentsPosted.length; i++) {
+        const grp = await Assignment.findById(assignmentsPosted[i]);
         if (grp) {
             array.push(grp);
         }
@@ -647,30 +660,17 @@ const getAllItemsOfAGrp = async (req, res) => {
 }
 
 
-// const getAllAssignmentsForAGroup = async (req,res)=>{
-//     try{
-
-//         const loggeduser = req.user;
-//         const user = await User.findOne({ email: loggeduser.email });
-//         if (!user) {
-//             throw new Error("User Not Found");
-//         }
-
-//         const query = req.query.type;
-//         let allGroups = [];
-//         if(query === "public"){
-//             allGroups = await groupModel.find({isPublic:true});
-//         }
-//         else if(query===null){
-//             allGroups = await groupModel.find({});
-//         }
-//         res.status(200).json({success:true, details:allGroups});
-//         return;
-//     }catch(err){
-//         res.status(400).json({success:false, error:err.toString()});
-//     }
-// }
+const getAllAssignmentsForAGroup = async (req,res)=>{
+    try{
+        const grpDetails = req.body.groupDetails;
+        const getGrpAssignments = await getAssignmentArray(grpDetails.assignmentsPosted);
+        res.status(200).json({success:true, details:getGrpAssignments})
+        return;
+    }catch(err){
+        res.status(400).json({success:false, error:err.toString()});
+    }
+}
 //ll
 
 
-export { createNewGroup, deleteGroup, getAllGroups, getUserGroups, addAdmins, addUserToGroup, getJoiningCode, resetJoiningCode, setGrpType, getDetailsOfAGroup, transferOwnerShip, joinGrpByCode, getAllMembers, getAllItemsOfAGrp };
+export { createNewGroup, deleteGroup, getAllGroups, getUserGroups, addAdmins, addUserToGroup, getJoiningCode, resetJoiningCode, setGrpType, getDetailsOfAGroup, transferOwnerShip, joinGrpByCode, getAllMembers, getAllItemsOfAGrp, getAllAssignmentsForAGroup };

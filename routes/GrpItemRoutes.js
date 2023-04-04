@@ -39,7 +39,7 @@ grpItemRoutes.post("/grp/reply",fetchUser,checkGrpMember,createReplyToPost);
 
 grpItemRoutes.delete("/grp/deletepost",fetchUser,checkGrpMember,deleteAItem);
 
-grpItemRoutes.patch("/grp/editpost",fetchUser,checkGrpMember,editPost);
+grpItemRoutes.patch("/grp/editpost",upload.array("files"),fetchUser,checkGrpMember,editPost);
 
 
 export {grpItemRoutes}
