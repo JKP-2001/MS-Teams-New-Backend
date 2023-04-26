@@ -1,4 +1,4 @@
-import { user as User } from "../models/user.js";
+import { user as User } from "../models/User.js";
 
 import { groupModel } from "../models/Group.js";
 

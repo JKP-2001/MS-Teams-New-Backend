@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import handlebars from "handlebars";
 
-import { user as User } from "../models/user.js";
+import { user as User } from "../models/User.js";
 import { getDate, sendEmail, generateAndSendOTP, sendVerifyEmail, sendResetPasswordEmail } from "../functions.js";
 
 const saltRound = 10;

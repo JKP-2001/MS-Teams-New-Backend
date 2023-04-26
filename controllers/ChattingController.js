@@ -1,5 +1,5 @@
 
-import { user as User } from "../models/user.js";
+import { user as User } from "../models/User.js";
 import { Conversations } from "../models/Conversation.js";
 import { Messages } from "../models/Message.js";
 
