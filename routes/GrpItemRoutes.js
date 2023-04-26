@@ -2,7 +2,7 @@ import checkAdmin from "../middlewares/checkAdmin.js";
 import express from "express";
 const grpItemRoutes = express.Router();
 import { fetchUser } from "../middlewares/fetchUser.js";
-import { createReplyToPost, deleteAItem, editPost, postNewItem } from "../Controllers/GrpItemsController.js";
+import { createReplyToPost, deleteAItem, editPost, postNewItem } from "../controllers/GrpItemsController.js";
 
 import multer from "multer";
 import checkGrpMember from "../middlewares/checkGrpMember.js";

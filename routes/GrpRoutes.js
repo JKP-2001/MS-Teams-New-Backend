@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import express from "express";
 import { fetchUser } from "../middlewares/fetchUser.js";
-import { addAdmins, addUserToGroup, createNewGroup, deleteGroup, getAllAssignmentsForAGroup, getAllGroups, getAllItemsOfAGrp, getAllMembers, getDetailsOfAGroup, getJoiningCode, getUserGroups, joinGrpByCode, resetJoiningCode, setGrpType, transferOwnerShip } from "../Controllers/GrpController.js";
+import { addAdmins, addUserToGroup, createNewGroup, deleteGroup, getAllAssignmentsForAGroup, getAllGroups, getAllItemsOfAGrp, getAllMembers, getDetailsOfAGroup, getJoiningCode, getUserGroups, joinGrpByCode, resetJoiningCode, setGrpType, transferOwnerShip } from "../controllers/GrpController.js";
 import checkAdmin from "../middlewares/checkAdmin.js";
 import checkGrpMember from "../middlewares/checkGrpMember.js";
 

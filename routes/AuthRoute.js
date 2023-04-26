@@ -1,7 +1,7 @@
 import express from "express";
 const authRouter = express.Router();
 
-import {acceptAccount, createUser, loginUser, resetPassword, sentResetPasswordMail, checkOTP, getUserProfile, checkTokenExpiry, getUser} from "../Controllers/AuthController.js";
+import {acceptAccount, createUser, loginUser, resetPassword, sentResetPasswordMail, checkOTP, getUserProfile, checkTokenExpiry, getUser} from "../controllers/AuthController.js";
 import { fetchUser } from "../middlewares/fetchUser.js";
 
 authRouter.post("/account/createuser",createUser);
