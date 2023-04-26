@@ -12,6 +12,8 @@ import { grpRouter } from "./Routes/GrpRoutes.js";
 import path from "path";
 import { grpItemRoutes } from "./Routes/GrpItemRoutes.js";
 import { grpAssignmentRoutes } from "./routes/AssignmentRoutes.js";
+import ChattingRouter from "./routes/ChattingRoutes.js";
+import userRouter from "./routes/userRoute.js";
 
 
 const BASE_URL = process.env.BASE_URL;
@@ -22,7 +24,7 @@ app.use(methodOverride())
 app.use(morgan("dev"));
 app.use('/uploads', express.static('uploads'));
 
-// enable CORS
+// enable CORSn
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Credentials", "true");
@@ -50,6 +52,8 @@ app.use(BASE_URL, authRouter);
 app.use(BASE_URL, grpRouter);
 app.use(BASE_URL,grpItemRoutes)
 app.use(BASE_URL,grpAssignmentRoutes)
+app.use(BASE_URL,ChattingRouter);
+app.use(BASE_URL,userRouter)
 
 
 const swaggerDefinition = {
