@@ -3,14 +3,14 @@ dotenv.config();
 
 import express from "express";
 import mongoose from "mongoose";
-import authRouter from "./Routes/AuthRoute.js";
+import authRouter from "./routes/AuthRoute.js";
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express"
 import methodOverride from "method-override";
 import morgan from "morgan";
-import { grpRouter } from "./Routes/GrpRoutes.js";
+import { grpRouter } from "./routes/GrpRoutes.js";
 import path from "path";
-import { grpItemRoutes } from "./Routes/GrpItemRoutes.js";
+import { grpItemRoutes } from "./routes/GrpItemRoutes.js";
 import { grpAssignmentRoutes } from "./routes/AssignmentRoutes.js";
 import ChattingRouter from "./routes/ChattingRoutes.js";
 import userRouter from "./routes/userRoute.js";
