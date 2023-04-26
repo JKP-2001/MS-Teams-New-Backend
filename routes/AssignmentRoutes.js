@@ -4,7 +4,7 @@ const grpAssignmentRoutes = express.Router();
 import { fetchUser } from "../middlewares/fetchUser.js";
 
 import multer from "multer";
-import { createAssignment } from "../Controllers/AssController.js";
+
 import { createNewAssignment, getAParticularAssignment } from "../controllers/AssignmentContoller.js";
 import checkGrpMember from "../middlewares/checkGrpMember.js";
 
