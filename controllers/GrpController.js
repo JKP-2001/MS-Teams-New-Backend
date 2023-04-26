@@ -2,9 +2,9 @@ import express from "express"
 import mongoose from "mongoose"
 import fs from "fs";
 import { generateGrpCode, ReadAppend } from "../functions.js";
-import { groupModel } from "../Models/Group.js"
-import { User } from "../models/User.js";
-import { groupPostModel, scheduleMeetModel } from "../Models/GrpItems.js";
+import { groupModel } from "../models/Group.js"
+import { user as User } from "../models/user.js";
+import { groupPostModel, scheduleMeetModel } from "../models/GrpItems.js";
 import { Assignment } from "../models/Assignment.js";
 
 const file = 'APILogs.txt'

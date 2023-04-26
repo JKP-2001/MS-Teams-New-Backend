@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { User } from "../models/User.js";
+import { user as User } from "../models/user.js";
 
 const fetchKeywordUser = async(req,res)=>{
     try{

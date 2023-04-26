@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
-import { Assignment } from "../models/Assignment.js";
-import { groupModel } from "../Models/Group.js";
+// import { Assignment } from "../Models/Assignment.js";
+// import { groupModel } from "../Models/Group.js";
+import { groupAssignmentModel } from "../models/GrpItems.js";
+import { groupModel } from "../models/Group.js";
 // import { User } from "../models/User";
 
 // var fs = require('fs');
@@ -55,7 +57,7 @@ const createNewAssignment = async (req, res) => {
             createdBy:user._id
         }
 
-        const newAss = await Assignment.create(newAssignment);
+        const newAss = await groupAssignmentModel.create(newAssignment);
         var assignmentsPosted = grpDetails.assignmentsPosted;
         assignmentsPosted.push(newAss._id);
         const updateGrp = await groupModel.findByIdAndUpdate(grpDetails._id,{assignmentsPosted})

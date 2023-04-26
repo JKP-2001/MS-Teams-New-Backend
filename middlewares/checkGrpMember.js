@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
-import { groupModel } from "../Models/Group.js";
-import { User } from "../models/User.js";
+
+import {user as User } from "../models/user.js";
+import { groupModel } from "../models/Group.js";
 
 
 const checkGrpMember = async(req,res,next)=>{

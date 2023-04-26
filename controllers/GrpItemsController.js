@@ -1,8 +1,8 @@
-import { User } from "../models/User.js";
+import { user as User } from "../models/user.js";
 
-import { groupModel } from "../Models/Group.js";
+import { groupModel } from "../models/Group.js";
 
-import { groupAssignmentModel, groupPostModel, replyModel, scheduleMeetModel } from "../Models/GrpItems.js";
+import { groupAssignmentModel, groupPostModel, replyModel, scheduleMeetModel } from "../models/GrpItems.js";
 
 import mongoose from "mongoose";
 import fs from "fs";
