@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-// import { Assignment } from "../Models/Assignment.js";
+import { Assignment } from "../models/Assignment.js";
 // import { groupModel } from "../Models/Group.js";
 import { groupAssignmentModel } from "../models/GrpItems.js";
 import { groupModel } from "../models/Group.js";
@@ -57,13 +57,13 @@ const createNewAssignment = async (req, res) => {
             createdBy:user._id
         }
 
-        const newAss = await groupAssignmentModel.create(newAssignment);
+        const newAss = await Assignment.create(newAssignment);
         var assignmentsPosted = grpDetails.assignmentsPosted;
         assignmentsPosted.push(newAss._id);
         const updateGrp = await groupModel.findByIdAndUpdate(grpDetails._id,{assignmentsPosted})
         res.status(200).json({success:true, details:newAss});
     } catch (err) {
-        res.status(400).json({ success: "false false", error: err.toString() });
+        res.status(400).json({ success: false, error: err.toString() });
     }
 }
 
@@ -80,7 +80,7 @@ const getAParticularAssignment = async(req,res)=>{
         
         res.status(200).json({success:true, details:post});
     }catch(err){
-        res.status(400).json({ success: "false false", error: err.toString() });
+        res.status(400).json({ success:false, error: err.toString() });
     }
 }
 
