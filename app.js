@@ -81,9 +81,9 @@ const runApp = () => {
 
     mongoose.set('strictQuery', false);
 
-    // const url = "mongodb+srv://" + process.env.mongo_user + ":" + process.env.mongopass + "@cluster0.ncrzato.mongodb.net/Clone?retryWrites=true&w=majority";
+    const url = "mongodb+srv://" + process.env.mongo_user + ":" + process.env.mongopass + "@cluster0.ncrzato.mongodb.net/Clone?retryWrites=true&w=majority";
     // const url = "mongodb://localhost:27017"
-    const url = "mongodb://0.0.0.0:27017/clone";
+    // const url = "mongodb://0.0.0.0:27017/clone";
     // const url = "mongodb+srv://Admin-Jay:"+process.env.mongopass+"@cluster0.4v9bd.mongodb.net/clone?retryWrites=true&w=majority"
 
     mongoose.connect(url, (err, res) => {
