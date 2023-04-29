@@ -668,9 +668,11 @@ const getAllAssignmentsForAGroup = async (req, res) => {
     try {
         const grpDetails = req.body.groupDetails;
         let getGrpAssignments = await getAssignmentArray(grpDetails.assignmentsPosted);
+
         getGrpAssignments.sort(function(a, b) {
             return (a.dueDateTime < b.dueDateTime) ? -1 : ((a.dueDateTime > b.dueDateTime) ? 1 : 0);
         });
+        
         res.status(200).json({ success: true, details: getGrpAssignments })
         return;
     } catch (err) {

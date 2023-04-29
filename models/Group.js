@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
 
+/* This code is defining a Mongoose schema for a group. It specifies the various fields that a group
+document will have, such as name, description, joining code, owner, admins, members, etc. Each field
+has a specified data type and default value. The schema is then used to create a Mongoose model
+called `groupModel`, which can be used to interact with the database collection for groups. */
+
+
 const groupSchema = new mongoose.Schema({
     name:{type:String, required:true},
     description:{type:String,},

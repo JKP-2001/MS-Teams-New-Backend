@@ -5,7 +5,7 @@ import { fetchUser } from "../middlewares/fetchUser.js";
 
 import multer from "multer";
 
-import { createNewAssignment, deleteAnAssignment, getAParticularAssignment } from "../controllers/AssignmentContoller.js";
+import { createNewAssignment, deleteAnAssignment, getAParticularAssignment, getAllAssignmentOfAUser } from "../controllers/AssignmentContoller.js";
 import checkGrpMember from "../middlewares/checkGrpMember.js";
 import checkForAssignment from "../middlewares/checkForAssignment.js";
 
@@ -40,6 +40,8 @@ grpAssignmentRoutes.post("/grp/newassignment",upload.array("assignments"),fetchU
 grpAssignmentRoutes.post("/grp/assignment/:id",fetchUser,checkGrpMember,getAParticularAssignment)
 
 grpAssignmentRoutes.delete("/grp/assignment/del",fetchUser,checkForAssignment,deleteAnAssignment);
+
+grpAssignmentRoutes.get("/get-assignments",fetchUser,getAllAssignmentOfAUser);
 
 export {grpAssignmentRoutes}
 
