@@ -5,8 +5,9 @@ import { fetchUser } from "../middlewares/fetchUser.js";
 
 import multer from "multer";
 
-import { createNewAssignment, getAParticularAssignment } from "../controllers/AssignmentContoller.js";
+import { createNewAssignment, deleteAnAssignment, getAParticularAssignment } from "../controllers/AssignmentContoller.js";
 import checkGrpMember from "../middlewares/checkGrpMember.js";
+import checkForAssignment from "../middlewares/checkForAssignment.js";
 
 const file_storage = multer.diskStorage({        // function for a image storage
     destination: function (req, file, cb) {     // setting destination
@@ -37,6 +38,8 @@ const upload =
 grpAssignmentRoutes.post("/grp/newassignment",upload.array("assignments"),fetchUser,checkAdmin,createNewAssignment);
 
 grpAssignmentRoutes.post("/grp/assignment/:id",fetchUser,checkGrpMember,getAParticularAssignment)
+
+grpAssignmentRoutes.delete("/grp/assignment/del",fetchUser,checkForAssignment,deleteAnAssignment);
 
 export {grpAssignmentRoutes}
 

@@ -22,6 +22,10 @@ async function getAllGroupsFromArray(grpArray) {
     return array;
 }
 
+function custom_sort(a, b) {
+    return new Date(a.dueDateTime) - new Date(b.lastUpdated);
+}
+
 //Function to extract member
 async function getAllMembersFromArray(memberArray) {
     let array = [];
@@ -47,14 +51,14 @@ async function getAssignmentArray(assignmentsPosted) {
 }
 
 
-async function getItemFromArray(grpItems){
+async function getItemFromArray(grpItems) {
     var array = [];
-    for(let i = 0; i< grpItems.length; i++){
+    for (let i = 0; i < grpItems.length; i++) {
         var item = await groupPostModel.findById(grpItems[i]);
-        if(item){
+        if (item) {
             const owner = await User.findById(item.details.postedBy).select('firstName lastName email');
-            if(owner){
-                
+            if (owner) {
+
                 item = JSON.parse(JSON.stringify(item));
                 item.owner = owner
                 array.push(item);
@@ -62,9 +66,9 @@ async function getItemFromArray(grpItems){
             }
         }
         item = await scheduleMeetModel.findById(grpItems[i]);
-        if(item){
+        if (item) {
             const owner = await User.findById(item.details.postedBy).select('firstName lastName email');
-            if(owner){
+            if (owner) {
                 item = JSON.parse(JSON.stringify(item));
                 item.owner = owner
                 array.push(item);
@@ -240,9 +244,9 @@ const addUserToGroup = async (req, res) => {
         else if (query === "delete") {
             ReadAppend(file, `PATCH: ${BASE_URL}/group/member?action=delete called by user ${user.email} at ${Date.now()}\n`);
 
-            
 
-            if (String(grp.owner) === String(user._id) || grp.admins.includes(user._id) || req.body.email===req.user.email) {
+
+            if (String(grp.owner) === String(user._id) || grp.admins.includes(user._id) || req.body.email === req.user.email) {
 
                 const reqUser = req.body.email;
                 const isUser = await User.findOne({ email: reqUser });
@@ -250,7 +254,7 @@ const addUserToGroup = async (req, res) => {
                 if (!isUser) {
                     throw new Error("Requested user doens't exist.")
                 }
-                
+
                 let members = grp.members;
 
 
@@ -647,12 +651,12 @@ const getAllItemsOfAGrp = async (req, res) => {
         if (!grp.admins.includes(isUser._id) && String(grp.owner) !== String(isUser._id) && !grp.members.includes(isUser._id)) {
             throw new Error("You are not a member of this group");
         }
-         
+
         const grpItems = grp.itemsPosted;
 
         const allItems = await getItemFromArray(grpItems);
         // console.log(allItems);
-        res.status(200).json({success:true, details:allItems})
+        res.status(200).json({ success: true, details: allItems })
 
     } catch (err) {
         res.status(400).json({ "success": false, error: err.toString() });
@@ -660,14 +664,17 @@ const getAllItemsOfAGrp = async (req, res) => {
 }
 
 
-const getAllAssignmentsForAGroup = async (req,res)=>{
-    try{
+const getAllAssignmentsForAGroup = async (req, res) => {
+    try {
         const grpDetails = req.body.groupDetails;
-        const getGrpAssignments = await getAssignmentArray(grpDetails.assignmentsPosted);
-        res.status(200).json({success:true, details:getGrpAssignments})
+        let getGrpAssignments = await getAssignmentArray(grpDetails.assignmentsPosted);
+        getGrpAssignments.sort(function(a, b) {
+            return (a.dueDateTime < b.dueDateTime) ? -1 : ((a.dueDateTime > b.dueDateTime) ? 1 : 0);
+        });
+        res.status(200).json({ success: true, details: getGrpAssignments })
         return;
-    }catch(err){
-        res.status(400).json({success:false, error:err.toString()});
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.toString() });
     }
 }
 //ll
