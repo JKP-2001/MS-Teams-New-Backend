@@ -1,65 +1,91 @@
+/* The above code is a module that exports several functions related to managing assignments in a
+group-based learning management system. The functions include creating a new assignment, deleting an
+assignment, getting a particular assignment, getting all assignments of a user, and editing an
+assignment. These functions use various models such as Assignment, groupModel, GrpItems, and User to
+perform CRUD operations on the database. The functions also handle file uploads and deletions, and
+assign/unassign assignments to/from group members. The code uses async/await to handle asynchronous
+operations and returns JSON responses to the client. */
+
+
 import mongoose from "mongoose";
 import { Assignment } from "../models/Assignment.js";
 // import { groupModel } from "../Models/Group.js";
 import { groupAssignmentModel } from "../models/GrpItems.js";
 import { groupModel } from "../models/Group.js";
-import { user as User} from "../models/User.js";
-// import { User } from "../models/User";
+import { user as User } from "../models/User.js";
 
-// var fs = require('fs');
-// var dir = './tmp';
+import fs from "fs"
 
-// if (!fs.existsSync(dir)){
-//     fs.mkdirSync(dir);
-// }
 
 let OWNER;
 let ADMINS;
 
 
-const assignToAllMembers = async (membersArr,assId)=>{
+/**
+ * This function assigns an assignment to all members in an array, except for the owner and admins.
+ * @param membersArr - an array of member IDs to whom the assignment needs to be assigned.
+ * @param assId - The ID of the assignment that needs to be assigned to all members in the membersArr
+ * array.
+ */
+const assignToAllMembers = async (membersArr, assId) => {
     const p = membersArr.length;
 
-    for(let i=0;i<p;i++){
+    for (let i = 0; i < p; i++) {
         const mem_id = membersArr[i];
         const user = await User.findById(mem_id);
-        if(user){
-            if(String(OWNER)===String(user._id) || ADMINS.includes(user._id)){
+        if (user) {
+            if (String(OWNER) === String(user._id) || ADMINS.includes(user._id)) {
                 continue;
             }
         }
-        if(user){
+        if (user) {
             let assignmentsAssign = user.assignmentsAssign;
             assignmentsAssign.push(assId);
-            await User.findByIdAndUpdate(mem_id,{assignmentsAssign});
+            await User.findByIdAndUpdate(mem_id, { assignmentsAssign });
         }
     }
 }
 
-const unassingToAll = async (membersArr,assId)=>{
+/**
+ * The function unassigns a specific assignment from all members in a given array.
+ * @param membersArr - an array of member IDs
+ * @param assId - The ID of an assignment that needs to be unassigned from all members in the
+ * `membersArr` array.
+ */
+const unassingToAll = async (membersArr, assId) => {
     const p = membersArr.length;
 
-    for(let i=0;i<p;i++){
+    for (let i = 0; i < p; i++) {
         const mem_id = membersArr[i];
         const user = await User.findById(mem_id);
-        if(user){
+        if (user) {
             let assignmentsAssign = user.assignmentsAssign;
-            if(assignmentsAssign.includes(assId)){
-                assignmentsAssign.splice(assignmentsAssign.indexOf(assId),1);
-                await User.findByIdAndUpdate(mem_id,{assignmentsAssign});
+            if (assignmentsAssign.includes(assId)) {
+                assignmentsAssign.splice(assignmentsAssign.indexOf(assId), 1);
+                await User.findByIdAndUpdate(mem_id, { assignmentsAssign });
             }
         }
     }
 }
 
-const getTheAssignments = async (assignmentsAssign)=>{
+/**
+ * This function retrieves assignments and their corresponding group names.
+ * @param assignmentsAssign - It is an array of assignment IDs that need to be retrieved from the
+ * database.
+ * @returns The function `getTheAssignments` is returning an array of objects that represent
+ * assignments. Each object contains information about an assignment, including its ID, name,
+ * description, due date, and the name of the group it belongs to. The assignments are retrieved from
+ * the database using their IDs, which are passed as an argument to the function. The function uses the
+ * `findById` method to retrieve each assignment
+ */
+const getTheAssignments = async (assignmentsAssign) => {
     const len = assignmentsAssign.length;
     var result = [];
-    for(let i=0;i<len;i++){
+    for (let i = 0; i < len; i++) {
         let item = await Assignment.findById(assignmentsAssign[i]);
         const grp = await groupModel.findById(item.grpId);
-        if(grp){
-            if(item){
+        if (grp) {
+            if (item) {
                 item = JSON.parse(JSON.stringify(item));
                 item["grp_name"] = grp.name;
                 result.push(item);
@@ -83,23 +109,9 @@ const getTheAssignments = async (assignmentsAssign)=>{
 const createNewAssignment = async (req, res) => {
     try {
 
-        // const user = await User.findOne({ email: req.user.email });
-        // if (!user) {
-        //     throw new Error("User doesn't exist.");
-        // }
-
-        // const grpId = req.body.grp_id;
-        // const grpDetails = await groupModel.findById(grpId);
-        // if (!grpDetails) {
-        //     throw new Error("Grp doesn't exists.");
-        // }
-
-        // if(toString(grpDetails.owner) !== toString(user._id) && !grpDetails.admins.includes(user._id)){
-        //     throw new Error("Only Admins can create a new assignment");
-        // }
-        // console.log({body:req.body})
+        
         const grpDetails = req.body.groupDetails;
-        // console.log({grpDetails})
+        
         const user = req.body.userDetails;
 
         var files = [];
@@ -132,7 +144,7 @@ const createNewAssignment = async (req, res) => {
         var assignmentsPosted = grpDetails.assignmentsPosted;
         assignmentsPosted.push(newAss._id);
         const updateGrp = await groupModel.findByIdAndUpdate(grpDetails._id, { assignmentsPosted })
-        await assignToAllMembers(updateGrp.members,newAss._id);
+        await assignToAllMembers(updateGrp.members, newAss._id);
         res.status(200).json({ success: true, details: newAss });
     } catch (err) {
         res.status(400).json({ success: false, error: err.toString() });
@@ -158,11 +170,11 @@ const deleteAnAssignment = async (req, res) => {
 
         const deleteItem = await Assignment.findByIdAndDelete(assDetails._id);
         if (deleteItem) {
-            await unassingToAll(grpDetails.members,assDetails._id);
+            await unassingToAll(grpDetails.members, assDetails._id);
             let assignmentsPosted = grpDetails.assignmentsPosted;
-            if(assignmentsPosted.includes(assDetails._id)){
-                assignmentsPosted.splice(assignmentsPosted.indexOf(assDetails._id),1);
-                await groupModel.findByIdAndUpdate(grpDetails._id,{assignmentsPosted});
+            if (assignmentsPosted.includes(assDetails._id)) {
+                assignmentsPosted.splice(assignmentsPosted.indexOf(assDetails._id), 1);
+                await groupModel.findByIdAndUpdate(grpDetails._id, { assignmentsPosted });
             }
             res.status(200).json({ success: true, details: `Successfully Deleted by ${user.email}.` });
         }
@@ -191,28 +203,121 @@ const getAParticularAssignment = async (req, res) => {
     }
 }
 
-const getAllAssignmentOfAUser = async(req,res)=>{
-    try{
+/**
+ * This function retrieves all assignments assigned to a user, sorts them by due date, and returns them
+ * in a JSON response.
+ * @param req - req stands for request and it is an object that contains information about the HTTP
+ * request that was made, such as the URL, headers, and any data that was sent in the request body. It
+ * is passed as the first parameter to this function.
+ * @param res - The `res` parameter is the response object that will be sent back to the client with
+ * the HTTP response. It contains methods to set the status code, headers, and body of the response.
+ * @returns This function returns a list of all assignments assigned to a user, sorted by their due
+ * date and time. The response is in JSON format with a success flag and the details of the
+ * assignments. If there is an error, it returns a JSON response with a success flag set to false and
+ * an error message.
+ */
+const getAllAssignmentOfAUser = async (req, res) => {
+    try {
         const userEmail = req.user.email;
-        const user = await User.findOne({email:userEmail});
-        
-        if(!user){
+        const user = await User.findOne({ email: userEmail });
+
+        if (!user) {
             throw new Error("User Not Found");
         }
 
         const assignmentsAssign = user.assignmentsAssign;
-        
+
         let allAssignments = await getTheAssignments(assignmentsAssign);
 
-        allAssignments.sort(function(a, b) {
+        allAssignments.sort(function (a, b) {
             return (a.dueDateTime < b.dueDateTime) ? -1 : ((a.dueDateTime > b.dueDateTime) ? 1 : 0);
         });
 
-        res.status(200).json({success:true,details:allAssignments});
+        res.status(200).json({ success: true, details: allAssignments });
 
-    }catch(err){
+    } catch (err) {
         res.status(400).json({ success: false, error: err.toString() });
     }
 }
 
-export { createNewAssignment, getAParticularAssignment, deleteAnAssignment, getAllAssignmentOfAUser }
+
+/**
+ * This function edits an assignment by adding or deleting files and updating its title, instructions,
+ * and due date.
+ * @param req - req is the request object that contains information about the HTTP request made by the
+ * client, such as the request parameters, headers, and body.
+ * @param res - The "res" parameter is the response object that will be sent back to the client after
+ * the function is executed. It contains information such as the status code and any data that needs to
+ * be sent back to the client.
+ * @returns either a success message with a status code of 200 if the assignment was updated
+ * successfully, or an error message with a status code of 400 if there was an error during the update
+ * process.
+ */
+const editAssignment = async (req, res) => {
+    try {
+
+        const deletedItem = req.body.deletedItems;
+        const assId = req.params.assId;
+        const assignment = await Assignment.findById(assId);
+        
+        if(!assignment){
+            throw new Error("Assignment Not Found");
+        }
+        
+        const user_temp = req.user;
+        const user = await User.findOne({email:user_temp.email});
+        
+        if(!user){
+            throw new Error("User not found.");
+        }
+
+        const assignmentGrp = await groupModel.findById(assignment.grpId);
+        if(!assignmentGrp){
+            throw new Error("Assignment's grp not found");
+        }
+
+        if(!assignmentGrp.members.includes(user._id) && String(assignmentGrp.owner)!==String(user._id)){
+            throw new Error("Not authorized to edit the assignment.");
+        }
+
+        let files = assignment.files;
+        
+        if(req.files && req.files.length>0){
+            for (let i = 0; i < req.files.length; i++) {
+                const newPath = req.files[i].path.replace(/\\/g, '/');
+                const entry = {
+                    files:newPath,
+                    name:req.files[i].originalname,
+                    type:req.files[i].mimetype
+                }
+                files.push(entry);
+            }   
+        }
+
+        if(deletedItem && deletedItem.map((item_obj)=>{
+            fs.unlinkSync(item_obj);
+        }))
+
+        if(deletedItem){
+            files.map((item_obj,i)=>{
+                if(deletedItem.includes(item_obj.files)){
+                    files.splice(i,1);
+                }
+            })
+        }
+        
+        const updateAssignment = await Assignment.findByIdAndUpdate(assignment._id,{
+            title:req.body.title?req.body.title:assignment.title,
+            instructions:req.body.instructions?req.body.instructions:assignment.instructions,
+            files:files, 
+            dueDateTime:req.body.deadline?req.body.deadline:assignment.dueDateTime});
+        if(updateAssignment){
+            res.status(200).json({ success:true, details:"Assignment updated successfully." });
+        }
+        return;
+    } catch (err) {
+        res.status(400).json({ success: false, err: err.toString() });
+    }
+}
+
+export { createNewAssignment, getAParticularAssignment, deleteAnAssignment, getAllAssignmentOfAUser, editAssignment}
