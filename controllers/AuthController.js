@@ -117,7 +117,7 @@ const checkOTP = async (req, res) => {
             email: findUser.email,
             role: findUser.role
         }
-        const token = jwt.sign({ user: payLoad }, JWT_SECRET, { expiresIn: '240h' });
+        const token = jwt.sign({ user: payLoad }, JWT_SECRET, { expiresIn: '24hr' });
         const currDateTime = getDate();
         findUser.loginDates.push(currDateTime);
         const updatedUser = await User.findByIdAndUpdate(findUser._id, { loginDates: findUser.loginDates, lastotp: "" });
@@ -223,7 +223,24 @@ const getUser=async ( req,res)=>{
     }
 }
 
-export { createUser, acceptAccount, loginUser, sentResetPasswordMail, resetPassword, checkOTP, getUserProfile,checkTokenExpiry, getUser};
+const checkToken = async(req,res)=>{
+    try{
+        const token = req.header("auth-token");
+        const verify = jwt.verify(token,JWT_SECRET);
+
+        if(verify){
+            res.status(200).json({ success: true});            
+        }
+
+        else{
+            res.status(400).json({ success: false});            
+        }
+    }catch(err){
+        res.status(400).json({ success: false, detail: err.toString() });        
+    }
+}
+
+export { createUser, acceptAccount, loginUser, sentResetPasswordMail, resetPassword, checkOTP, getUserProfile,checkTokenExpiry, getUser, checkToken};
 
 
 

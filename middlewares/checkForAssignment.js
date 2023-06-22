@@ -33,7 +33,7 @@ const checkForAssignment = async(req,res,next)=>{
         const grpId = assignment.grpId;
         const grp = await groupModel.findById(grpId);
         if(!grp){
-            throw new Error("Grp Not Found");
+            throw new Error("Group Not Found");
         }
 
         

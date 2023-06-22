@@ -124,6 +124,16 @@ const getUserGroups = async (req, res) => {
     }
 }
 
+/**
+ * This is an asynchronous function that adds or deletes admins from a group based on the query
+ * parameter passed in the request.
+ * @param req - The request object containing information about the HTTP request made by the client,
+ * such as the request parameters, headers, and body.
+ * @param res - The "res" parameter is the response object that will be sent back to the client with
+ * the result of the function execution.
+ * @returns The function `addAdmins` returns either a success message with details in JSON format or an
+ * error message in JSON format.
+ */
 const addAdmins = async (req, res) => {
     try {
         const grpid = req.params.grpid;
@@ -219,21 +229,35 @@ const addUserToGroup = async (req, res) => {
 
             if (String(grp.owner) === String(user._id) || grp.admins.includes(user._id)) {
                 const reqUser = req.body.email;
+
                 const isUser = await User.findOne({ email: reqUser });
+                
                 if (!isUser) {
                     throw new Error("Requested user doens't exist.")
                 }
 
                 let members = grp.members;
+
                 if (members.includes(isUser._id)) {
                     throw new Error("User Already Exisited In the Group.")
                 }
+                
                 members.push(isUser._id);
+
+                let assignmentsPosted = grp.assignmentsPosted;
+        
+                let assignmentsAssign = user.assignmentsAssign;
+
+                for(let i = 0;i<assignmentsPosted.length;i++){
+                    assignmentsAssign.push(assignmentsPosted[i]);
+                }
+
                 const updatedGrp = await groupModel.findByIdAndUpdate(grpid, { members: members });
+
                 if (updatedGrp) {
                     let memeberGrps = isUser.memeberGrps;
                     memeberGrps.push(grp._id);
-                    const updateUser = await User.findByIdAndUpdate(isUser._id, { memeberGrps })
+                    const updateUser = await User.findByIdAndUpdate(isUser._id, { memeberGrps, assignmentsAssign })
                     res.status(200).json({ success: true, details: `${req.body.email} Added Successfully` });
                     return;
                 }
@@ -277,7 +301,7 @@ const addUserToGroup = async (req, res) => {
                 if (updatedGrp) {
                     let memeberGrps = isUser.memeberGrps;
                     memeberGrps.splice(memeberGrps.indexOf(grp._id), 1);
-                    const user = await User.findByIdAndUpdate(isUser._id, { memeberGrps })
+                    const user = await User.findByIdAndUpdate(isUser._id, { memeberGrps, assignmentsAssign:[] })
                     res.status(200).json({ success: true, details: `${req.body.email} deleted Successfully` });
                     return;
                 }
@@ -553,12 +577,17 @@ const joinGrpByCode = async (req, res) => {
     try {
         const loggedUser = req.user;
         const user = await User.findOne({ email: loggedUser.email });
+
         if (!user) {
             throw new Error("User not found");
         }
-        ReadAppend(file, `PATCH: ${BASE_URL}/group/joinbycode called by user ${user.email} at ${Date.now()}\n`);
+
+        ReadAppend(file, `PATCH: ${BASE_URL}/group/joinbycode called by user $
+        {user.email} at ${Date.now()}\n`);
+
         const grpCode = req.body.grp_code;
         const grp = await groupModel.findOne({ joiningCode: grpCode });
+
         if (!grp) {
             throw new Error("Grp Doesn't Exist Or Code Expired");
         }
@@ -569,10 +598,27 @@ const joinGrpByCode = async (req, res) => {
 
         let members = grp.members;
         members.push(user._id);
+
         let memeberGrps = user.memeberGrps;
         memeberGrps.push(grp._id);
+
+        // const mem_id = user._id;
+
+        let assignmentsPosted = grp.assignmentsPosted;
+        
+        let assignmentsAssign = user.assignmentsAssign;
+
+        for(let i = 0;i<assignmentsPosted.length;i++){
+            assignmentsAssign.push(assignmentsPosted[i]);
+        }
+
+        
+        
+
         const addedUser = await groupModel.findByIdAndUpdate(grp._id, { members });
-        const addedGrp = await User.findByIdAndUpdate(user._id, { memeberGrps });
+
+        const addedGrp = await User.findByIdAndUpdate(user._id, { memeberGrps, assignmentsAssign });
+
         res.status(200).json({ success: true, details: `Successfully added to the Grp.` })
         return;
 
@@ -669,10 +715,10 @@ const getAllAssignmentsForAGroup = async (req, res) => {
         const grpDetails = req.body.groupDetails;
         let getGrpAssignments = await getAssignmentArray(grpDetails.assignmentsPosted);
 
-        getGrpAssignments.sort(function(a, b) {
+        getGrpAssignments.sort(function (a, b) {
             return (a.dueDateTime < b.dueDateTime) ? -1 : ((a.dueDateTime > b.dueDateTime) ? 1 : 0);
         });
-        
+
         res.status(200).json({ success: true, details: getGrpAssignments })
         return;
     } catch (err) {

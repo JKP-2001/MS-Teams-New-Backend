@@ -20,6 +20,52 @@ import fs from "fs"
 let OWNER;
 let ADMINS;
 
+async function getAllTurnInFromArray(memberArray,id,assignment) {
+    let array = [];
+    for (let i = 0; i < memberArray.length; i++) {
+        let user = await User.findById(memberArray[i]).select("firstName lastName email _id assignmentsAssign assignmentsSubmitted");
+        var submission = assignment.submission;
+
+        let result = [];
+        let len = submission.length;
+
+        for(let i=0;i<len;i++){
+            if(String(submission[i].userId) === String(user._id)){
+                result = submission[i];
+                break;
+            }
+        }
+
+
+
+        if(user.assignmentsSubmitted.includes(id) && !user.assignmentsAssign.includes(id)){
+            
+            // const modifiedUser = { ...user.toObject() };
+
+            // Add a new field to the modified user object
+            // modifiedUser.material = result;
+            
+            
+
+            array.push(user);
+        }
+    }
+    return array;
+}
+
+async function getAllNotTurnInFromArray(memberArray,allmember,id) {
+    let array = [];
+    for (let i = 0; i < memberArray.length; i++) {
+            if(!allmember.includes(memberArray[i])){
+                const user = await User.findById(memberArray[i]).select("firstName lastName email _id assignmentsAssign assignmentsSubmitted");
+            if(!user.assignmentsSubmitted.includes(id) && user.assignmentsAssign.includes(id)){
+                array.push(user);
+            }
+        }
+    }
+    return array;
+}
+
 
 /**
  * This function assigns an assignment to all members in an array, except for the owner and admins.
@@ -109,9 +155,9 @@ const getTheAssignments = async (assignmentsAssign) => {
 const createNewAssignment = async (req, res) => {
     try {
 
-        
+
         const grpDetails = req.body.groupDetails;
-        
+
         const user = req.body.userDetails;
 
         var files = [];
@@ -240,6 +286,30 @@ const getAllAssignmentOfAUser = async (req, res) => {
     }
 }
 
+const getAllCompAssignmentOfAUser = async (req, res) => {
+    try {
+        const userEmail = req.user.email;
+        const user = await User.findOne({ email: userEmail });
+
+        if (!user) {
+            throw new Error("User Not Found");
+        }
+
+        const assignmentsAssign = user.assignmentsSubmitted;
+
+        let allAssignments = await getTheAssignments(assignmentsAssign);
+
+        allAssignments.sort(function (a, b) {
+            return (a.dueDateTime < b.dueDateTime) ? -1 : ((a.dueDateTime > b.dueDateTime) ? 1 : 0);
+        });
+
+        res.status(200).json({ success: true, details: allAssignments });
+
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.toString() });
+    }
+}
+
 
 /**
  * This function edits an assignment by adding or deleting files and updating its title, instructions,
@@ -259,60 +329,61 @@ const editAssignment = async (req, res) => {
         const deletedItem = req.body.deletedItems;
         const assId = req.params.assId;
         const assignment = await Assignment.findById(assId);
-        
-        if(!assignment){
+
+        if (!assignment) {
             throw new Error("Assignment Not Found");
         }
-        
+
         const user_temp = req.user;
-        const user = await User.findOne({email:user_temp.email});
-        
-        if(!user){
+        const user = await User.findOne({ email: user_temp.email });
+
+        if (!user) {
             throw new Error("User not found.");
         }
 
         const assignmentGrp = await groupModel.findById(assignment.grpId);
-        if(!assignmentGrp){
+        if (!assignmentGrp) {
             throw new Error("Assignment's grp not found");
         }
 
-        if(!assignmentGrp.members.includes(user._id) && String(assignmentGrp.owner)!==String(user._id)){
+        if (!assignmentGrp.members.includes(user._id) && String(assignmentGrp.owner) !== String(user._id)) {
             throw new Error("Not authorized to edit the assignment.");
         }
 
         let files = assignment.files;
-        
-        if(req.files && req.files.length>0){
+
+        if (req.files && req.files.length > 0) {
             for (let i = 0; i < req.files.length; i++) {
                 const newPath = req.files[i].path.replace(/\\/g, '/');
                 const entry = {
-                    files:newPath,
-                    name:req.files[i].originalname,
-                    type:req.files[i].mimetype
+                    files: newPath,
+                    name: req.files[i].originalname,
+                    type: req.files[i].mimetype
                 }
                 files.push(entry);
-            }   
+            }
         }
 
-        if(deletedItem && deletedItem.map((item_obj)=>{
+        if (deletedItem && deletedItem.map((item_obj) => {
             fs.unlinkSync(item_obj);
         }))
 
-        if(deletedItem){
-            files.map((item_obj,i)=>{
-                if(deletedItem.includes(item_obj.files)){
-                    files.splice(i,1);
+        if (deletedItem) {
+            files.map((item_obj, i) => {
+                if (deletedItem.includes(item_obj.files)) {
+                    files.splice(i, 1);
                 }
             })
         }
-        
-        const updateAssignment = await Assignment.findByIdAndUpdate(assignment._id,{
-            title:req.body.title?req.body.title:assignment.title,
-            instructions:req.body.instructions?req.body.instructions:assignment.instructions,
-            files:files, 
-            dueDateTime:req.body.deadline?req.body.deadline:assignment.dueDateTime});
-        if(updateAssignment){
-            res.status(200).json({ success:true, details:"Assignment updated successfully." });
+
+        const updateAssignment = await Assignment.findByIdAndUpdate(assignment._id, {
+            title: req.body.title ? req.body.title : assignment.title,
+            instructions: req.body.instructions ? req.body.instructions : assignment.instructions,
+            files: files,
+            dueDateTime: req.body.deadline ? req.body.deadline : assignment.dueDateTime
+        });
+        if (updateAssignment) {
+            res.status(200).json({ success: true, details: "Assignment updated successfully." });
         }
         return;
     } catch (err) {
@@ -320,4 +391,217 @@ const editAssignment = async (req, res) => {
     }
 }
 
-export { createNewAssignment, getAParticularAssignment, deleteAnAssignment, getAllAssignmentOfAUser, editAssignment}
+
+const turnInAnAssignment = async (req, res) => {
+    try {
+
+        const user_email = req.user;
+        const user = await User.findOne({ email: user_email.email });
+
+        if (!user) {
+            throw new Error("User Not Found");
+        }
+
+        const assignmentId = req.body.ass_id;
+
+        const assignment = await Assignment.findById(assignmentId);
+
+        if (!assignment) {
+            throw new Error("Assignment not found");
+        }
+
+        if (assignment.turnedInBy.includes(user._id) || !user.assignmentsAssign.includes(assignment._id)) {
+            throw new Error("Assignment already turned in or Assignment not assign to you.");
+        }
+
+
+
+
+        var files = [];
+
+        for (let i = 0; i < req.files.length; i++) {
+            const newPath = req.files[i].path.replace(/\\/g, '/');
+            const entry = {
+                files: newPath,
+                name: req.files[i].originalname,
+                type: req.files[i].mimetype
+            }
+            files.push(entry);
+        }
+
+
+        const newSubmission = {
+            userId: user._id,
+            material: files,
+            dateTime: Date.now(),
+        };
+
+        var submission = assignment.submission;
+
+        submission.push(newSubmission);
+
+        var turnedInBy = assignment.turnedInBy;
+        turnedInBy.push(user._id);
+
+        const updateAssignment = await Assignment.findByIdAndUpdate(assignment._id, { submission, turnedInBy });
+        const updateUser = await User.findByIdAndUpdate(user._id, { $pull: { assignmentsAssign: assignment._id }, $push: { assignmentsSubmitted: assignment._id } });
+
+        if (updateAssignment && updateUser) {
+            res.status(200).json({ success: true, details: "Assignment turned in successfully." });
+        }
+
+        return;
+
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.toString() });
+    }
+}
+
+
+const turnOffAssignment = async (req, res) => {
+    try {
+        const user_email = req.user;
+        const user = await User.findOne({ email: user_email.email });
+
+        if (!user) {
+            throw new Error("User not found.");
+        }
+
+        const assignment = await Assignment.findById(req.body.ass_id);
+
+        if (!assignment) {
+            throw new Error("Assignment not found");
+        }
+
+        if (!assignment.turnedInBy.includes(user._id) || user.assignmentsAssign.includes(assignment._id)) {
+            throw new Error("Assignment not turned in.");
+        }
+
+        let submission = assignment.submission;
+        let len = submission.length;
+
+        var files = [];
+
+        for (let i = 0; i < len; i++) {
+            if (String(submission[i].userId) === String(user._id)) {
+                files = submission[i].material;
+                submission.splice(i, 1);
+                break;
+            }
+        }
+
+        
+        if (files && files.map((item_obj) => {
+            fs.unlinkSync(item_obj.files);
+        }))
+
+
+        var turnedInBy = assignment.turnedInBy;
+        turnedInBy.splice(turnedInBy.indexOf(user._id), 1);
+
+        const updateAssignment = await Assignment.findByIdAndUpdate(assignment._id, { submission, $pull: { turnedInBy: user._id } });
+        const updateUser = await User.findByIdAndUpdate(user._id, { $push: { assignmentsAssign: assignment._id }, $pull: { assignmentsSubmitted: assignment._id } });
+
+        if (updateAssignment && updateUser) {
+            res.status(200).json({ success: true, details: "Assignment turned Off successfully." });
+        }
+
+        return;
+
+
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.toString() });
+    }
+}
+
+
+const getUserAssignmentFiles = async (req, res) => {
+    try {
+        const user_email = req.body.user_id;
+        const user = await User.findById(user_email);
+        
+        if(!user){
+            throw new Error("User not found");
+        }
+
+        const assignment = await Assignment.findById(req.body.ass_id);
+
+        if(!assignment){
+            throw new Error("Assignment Not Found");
+        }
+
+        if(!assignment.turnedInBy.includes(user._id)){
+            throw new Error("Not turned in");
+        }
+
+
+        var submission = assignment.submission;
+
+        let result = [];
+        let len = submission.length;
+
+        let newRes=null;
+
+        for(let i=0;i<len;i++){
+            if(String(submission[i].userId) === String(user._id)){
+                result = submission[i];
+                 const modifiedResult = { ...result.toObject() };
+
+            // Add a new field to the modified user object
+                modifiedResult.name = user.firstName+" "+user.lastName;
+                modifiedResult.email = user.email;
+                newRes = modifiedResult;
+                break;
+            }
+        }
+
+        res.status(200).json({success:true, info:newRes})
+
+        
+
+        return;
+        
+
+    } catch (err) {
+        res.status(400).json({ success: false, error: err.toString() });
+    }
+}
+
+
+const getTurnedInBy = async (req,res)=>{
+    try{
+        const user_email = req.user;
+        const user = await User.findOne({ email: user_email.email });
+        
+        if(!user){
+            throw new Error("User not found");
+        }
+
+        const assignment = await Assignment.findById(req.body.ass_id);
+
+        if(!assignment){
+            throw new Error("Assignment Not Found");
+        }       
+
+        const grp = await groupModel.findById(assignment.grpId);
+
+        if(!grp){
+            throw new Error("Group doesn't exists.");
+        }
+
+        const members = grp.members;
+
+        const turnInBy = await getAllTurnInFromArray(assignment.turnedInBy,assignment._id,assignment);
+        const notTurnInBy = await getAllNotTurnInFromArray(assignment.turnedInBy,members,assignment._id);
+
+        res.status(200).json({success:true,details:{turnInBy,notTurnInBy}});
+
+
+    }catch(err){
+        res.status(400).json({ success: false, error: err.toString() });
+    }
+}
+
+
+
+export { createNewAssignment, getAParticularAssignment, deleteAnAssignment, getAllAssignmentOfAUser, editAssignment, turnInAnAssignment, turnOffAssignment, getUserAssignmentFiles, getAllCompAssignmentOfAUser, getTurnedInBy }

@@ -13,6 +13,7 @@ const submission = {
   material: [filesSchema],
   dateTime: {
     type: Date,
+    required: true,
   },
   feedBack: {
     type: String,

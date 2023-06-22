@@ -49,6 +49,11 @@ const userSchema = new mongoose.Schema({
     ],
     memeberGrps:[
         {type:mongoose.Schema.Types.ObjectId, default:[]}
+    ],
+    assignmentsSubmitted:[
+        {
+            type:mongoose.Schema.Types.ObjectId, default:[]
+        }
     ]
 });
 
