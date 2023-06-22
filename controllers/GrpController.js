@@ -120,7 +120,7 @@ const getUserGroups = async (req, res) => {
         return;
 
     } catch (err) {
-        res.status(400).json({ success: false, error: err.troString() })
+        res.status(400).json({ success: false, error: err.toString() })
     }
 }
 
