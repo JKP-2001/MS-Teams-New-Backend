@@ -84,8 +84,8 @@ const runApp = () => {
 
     mongoose.set('strictQuery', false);
 
-    const url = "mongodb://0.0.0.0:27017/clone";
-    // const url = "mongodb+srv://Admin-Jay:"+process.env.mongopass+"@cluster0.4v9bd.mongodb.net/clone?retryWrites=true&w=majority"
+    // const url = "mongodb://0.0.0.0:27017/clone";
+    const url = "mongodb+srv://Admin-Jay:"+process.env.mongopass+"@cluster0.4v9bd.mongodb.net/clone?retryWrites=true&w=majority"
 
     mongoose.connect(url, (err, res) => {
         //console.log(err, res);
