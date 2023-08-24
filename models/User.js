@@ -54,7 +54,13 @@ const userSchema = new mongoose.Schema({
         {
             type:mongoose.Schema.Types.ObjectId, default:[]
         }
-    ]
+    ],
+    notes:[
+        {
+            type:mongoose.Schema.Types.ObjectId, default:[]
+        }
+    ],
+    
 });
 
 const user = mongoose.model("user",userSchema);

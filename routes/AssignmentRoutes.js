@@ -59,6 +59,15 @@ const turnInUpload =
 
 // app.post("/upload_files", fetchuploadFiles);
 
+grpAssignmentRoutes.patch("/grp/assignment/turnoff",fetchUser,turnOffAssignment);
+
+grpAssignmentRoutes.patch("/grp/assignment/user_files",fetchUser,getUserAssignmentFiles);
+
+grpAssignmentRoutes.get("/get-assignment/completed",fetchUser,getAllCompAssignmentOfAUser);
+
+grpAssignmentRoutes.patch("/assignment/get-turnedinby",fetchUser,getTurnedInBy);
+
+
 grpAssignmentRoutes.post("/grp/newassignment",upload.array("assignments"),fetchUser,checkAdmin,createNewAssignment);
 
 grpAssignmentRoutes.post("/grp/assignment/:id",fetchUser,checkGrpMember,getAParticularAssignment)
@@ -71,13 +80,6 @@ grpAssignmentRoutes.patch("/grp/assignment/edit/:assId",fetchUser,upload.array("
 
 grpAssignmentRoutes.patch("/grp/assignment/turnin",fetchUser,turnInUpload.array("assignments"),turnInAnAssignment);
 
-grpAssignmentRoutes.patch("/grp/assignment/turnoff",fetchUser,turnOffAssignment);
-
-grpAssignmentRoutes.patch("/grp/assignment/user_files",fetchUser,getUserAssignmentFiles);
-
-grpAssignmentRoutes.get("/get-assignment/completed",fetchUser,getAllCompAssignmentOfAUser);
-
-grpAssignmentRoutes.patch("/assignment/get-turnedinby",fetchUser,getTurnedInBy);
 
 export {grpAssignmentRoutes}
 

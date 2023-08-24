@@ -106,9 +106,15 @@ const unassingToAll = async (membersArr, assId) => {
         const user = await User.findById(mem_id);
         if (user) {
             let assignmentsAssign = user.assignmentsAssign;
+            let assignmentsSubmitted = user.assignmentsSubmitted;
             if (assignmentsAssign.includes(assId)) {
                 assignmentsAssign.splice(assignmentsAssign.indexOf(assId), 1);
                 await User.findByIdAndUpdate(mem_id, { assignmentsAssign });
+            }
+
+            if(assignmentsSubmitted.includes(assId)){
+                assignmentsSubmitted.splice(assignmentsSubmitted.indexOf(assId), 1);
+                await User.findByIdAndUpdate(mem_id, { assignmentsSubmitted });
             }
         }
     }
@@ -129,12 +135,14 @@ const getTheAssignments = async (assignmentsAssign) => {
     var result = [];
     for (let i = 0; i < len; i++) {
         let item = await Assignment.findById(assignmentsAssign[i]);
-        const grp = await groupModel.findById(item.grpId);
-        if (grp) {
-            if (item) {
-                item = JSON.parse(JSON.stringify(item));
-                item["grp_name"] = grp.name;
-                result.push(item);
+        if(item){
+            const grp = await groupModel.findById(item.grpId);
+            if (grp) {
+                if (item) {
+                    item = JSON.parse(JSON.stringify(item));
+                    item["grp_name"] = grp.name;
+                    result.push(item);
+                }
             }
         }
     }

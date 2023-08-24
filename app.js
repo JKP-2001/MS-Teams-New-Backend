@@ -12,8 +12,11 @@ import { grpRouter } from "./routes/GrpRoutes.js";
 import path from "path";
 import { grpItemRoutes } from "./routes/GrpItemRoutes.js";
 import { grpAssignmentRoutes } from "./routes/AssignmentRoutes.js";
-import ChattingRouter from "./routes/ChattingRoutes.js";
+// import ChattingRouter from "./routes/ChattingRoutes.js";
 import userRouter from "./routes/userRoute.js";
+import notesRoutes from "./routes/notesRoutes.js";
+
+
 
 
 const BASE_URL = process.env.BASE_URL;
@@ -52,8 +55,8 @@ app.use(BASE_URL, authRouter);
 app.use(BASE_URL, grpRouter);
 app.use(BASE_URL,grpItemRoutes)
 app.use(BASE_URL,grpAssignmentRoutes)
-app.use(BASE_URL,ChattingRouter);
 app.use(BASE_URL,userRouter)
+app.use(BASE_URL,notesRoutes)
 
 
 const swaggerDefinition = {
@@ -81,8 +84,8 @@ const runApp = () => {
 
     mongoose.set('strictQuery', false);
 
-    // const url = "mongodb://0.0.0.0:27017/clone";
-    const url = "mongodb+srv://Admin-Jay:"+process.env.mongopass+"@cluster0.4v9bd.mongodb.net/clone?retryWrites=true&w=majority"
+    const url = "mongodb://0.0.0.0:27017/clone";
+    // const url = "mongodb+srv://Admin-Jay:"+process.env.mongopass+"@cluster0.4v9bd.mongodb.net/clone?retryWrites=true&w=majority"
 
     mongoose.connect(url, (err, res) => {
         //console.log(err, res);
