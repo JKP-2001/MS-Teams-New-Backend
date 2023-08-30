@@ -86,7 +86,7 @@ const runApp = () => {
 
     // const url = "mongodb://0.0.0.0:27017/clone";
     // const url = "mongodb+srv://Admin-Jay:"+process.env.mongopass+"@cluster0.4v9bd.mongodb.net/clone?retryWrites=true&w=majority"
-    const url = process.env.MONGO_URL;
+    const url = "mongodb://ms-team-clone:D4P7ylayNkhW0L6q30knMLx1swAdtNIOAQ7sCIxXDfXsqnsgtUlVyEXtsNcmg9R65VmSZHc1jCsMACDbDjzlVQ%3D%3D@ms-team-clone.mongo.cosmos.azure.com:10255/?ssl=true&replicaSet=globaldb&retrywrites=false&maxIdleTimeMS=120000&appName=@ms-team-clone@";
 
     mongoose.connect(url, (err, res) => {
         //console.log(err, res);
